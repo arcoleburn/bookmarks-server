@@ -18,14 +18,9 @@ app.use(morgan(morganOption));
 app.use(helmet());
 app.use(cors());
 
-app.get('/', (req, res) => {
-  res.send('Hello, world!');
-});
-//console.log(errorHandler)
-app.use(errorHandler);
 app.use(authValidation);
 
 app.use(bookmarksRouter);
-
+app.use(errorHandler);
 
 module.exports = app;
