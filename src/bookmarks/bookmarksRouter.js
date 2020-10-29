@@ -7,41 +7,45 @@ const { v4: uuid } = require('uuid');
 const bookmarksRouter = express.Router();
 const bodyParser = express.json();
 const { bookmarks } = require('../store');
+const BookmarksService = require('../bookmarks-service');
 
-bookmarksRouter
-  .route('/bookmarks')
-  .get((req, res) => {
-    res.json(bookmarks);
-  })
-  .post(bodyParser, (req, res) => {
-    let { title, url, description, rating } = req.body;
-    rating = parseInt(rating);
-    if (!title) {
-      logger.error('title is required');
-      return res.status(400).send('title is required field');
-    }
-    if (!url) {
-      logger.error('url required');
-      return res.status(400).send('url is required');
-    }
-    if (rating > 5 || rating < 1) {
-      logger.error('rating must be between 1 and 5');
-      return res
-        .status(400)
-        .send('rating needs to be between 1 and 5');
-    }
+bookmarksRouter.route('/bookmarks').get((req, res, next) => {
+  const db = req.app.get('db');
+  BookmarksService.getAllBookmarks(db)
+    .then((bookmarks) => {
+      res.json(bookmarks);
+    })
+    .catch(next);
+});
+// .post(bodyParser, (req, res) => {
+//   let { title, url, description, rating } = req.body;
+//   rating = parseInt(rating);
+//   if (!title) {
+//     logger.error('title is required');
+//     return res.status(400).send('title is required field');
+//   }
+//   if (!url) {
+//     logger.error('url required');
+//     return res.status(400).send('url is required');
+//   }
+//   if (rating > 5 || rating < 1) {
+//     logger.error('rating must be between 1 and 5');
+//     return res
+//       .status(400)
+//       .send('rating needs to be between 1 and 5');
+//   }
 
-    const id = uuid();
+//   const id = uuid();
 
-    const bookmark = { id, title, url, description, rating };
-    bookmarks.push(bookmark);
+//   const bookmark = { id, title, url, description, rating };
+//   bookmarks.push(bookmark);
 
-    logger.info(`card with id ${id} created`);
-    res
-      .status(201)
-      .location(`https://localhost:8080/card/${id}`)
-      .json(bookmark);
-  });
+//   logger.info(`card with id ${id} created`);
+//   res
+//     .status(201)
+//     .location(`https://localhost:8080/card/${id}`)
+//     .json(bookmark);
+// });
 
 bookmarksRouter
   .route('/bookmarks/:id')
@@ -69,4 +73,4 @@ bookmarksRouter
     res.status(204).end();
   });
 
-module.exports =  bookmarksRouter ;
+module.exports = bookmarksRouter;
